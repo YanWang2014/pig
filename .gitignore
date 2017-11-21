@@ -1,0 +1,9 @@
+*.tar
+*.mp4
+*.jpg
+others_ref/*
+*.record
+scene_ref/*
+hyper_record/*
+data/*
+result/*
