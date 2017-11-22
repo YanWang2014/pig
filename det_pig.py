@@ -29,13 +29,15 @@ from collections import defaultdict
 from io import StringIO
 from matplotlib import pyplot as plt
 from PIL import Image
+import cv2
+import timeit
 
 print(tf.__version__)
 if tf.__version__ != '1.4.0':
   raise ImportError('Please upgrade your tensorflow installation to v1.4.0!')
   
 test_mode = False
-
+BATCH_SIZE = 4
 
 sys.path.append("..")
 sys.path.append("../..")
@@ -45,7 +47,7 @@ from utils import visualization_utils as vis_util
 
 
 # What model to download.
-MODEL_NAME = 'faster_rcnn_inception_resnet_v2_atrous_oid_2017_11_08'#'faster_rcnn_nas_coco_2017_11_08'#'faster_rcnn_resnet101_coco_2017_11_08' #'faster_rcnn_nas_coco_2017_11_08' 'rfcn_resnet101_coco_2017_11_08'# , , 'ssd_inception_v2_coco_2017_11_08'
+MODEL_NAME = 'faster_rcnn_inception_resnet_v2_atrous_lowproposals_oid_2017_11_08'#'faster_rcnn_inception_resnet_v2_atrous_oid_2017_11_08'#'faster_rcnn_nas_coco_2017_11_08'#'faster_rcnn_resnet101_coco_2017_11_08' #'faster_rcnn_nas_coco_2017_11_08' 'rfcn_resnet101_coco_2017_11_08'# , , 'ssd_inception_v2_coco_2017_11_08'
 MODEL_FILE = MODEL_NAME + '.tar.gz'
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
@@ -57,7 +59,7 @@ PATH_TO_LABELS = os.path.join('../data', 'oid_bbox_trainable_label_map.pbtxt')#'
 
 NUM_CLASSES = 545 #oid_bbox_trainable_label_map.pbtxt, pig is 300, animal is 13
 
-if os.path.exists(MODEL_FILE):
+if os.path.exists(PATH_TO_CKPT):
     print("downloaded")
 else:
     print("downloading")
@@ -165,31 +167,37 @@ with detection_graph.as_default():
             print(i)
             TEST_IMAGE = os.listdir(PATH_TO_TEST_IMAGES_DIR + str(i))
             TEST_IMAGE_PATHS = [PATH_TO_TEST_IMAGES_DIR + str(i) + '/' + item for item in TEST_IMAGE]
-            for image_path, image_item in zip(TEST_IMAGE_PATHS, TEST_IMAGE):
-              image = Image.open(image_path)
-              # the array based representation of the image will be used later in order to prepare the
-              # result image with boxes and labels on it.
-              image_np = load_image_into_numpy_array(image)
-              # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-              image_np_expanded = np.expand_dims(image_np, axis=0)
-              # Actual detection.
+            image = cv2.imread(TEST_IMAGE_PATHS[0])
+            im_width = image.shape[1]
+            im_height = image.shape[0]
+            
+            for j in range(0, len(TEST_IMAGE_PATHS), BATCH_SIZE):
+#              time1 = timeit.default_timer()
+              images = []
+              for k in range(0, BATCH_SIZE):
+                  image = cv2.imread(TEST_IMAGE_PATHS[j+k])
+                  image = np.expand_dims(image, axis=0)
+                  images.append(image)
+                  image_np_expanded = np.concatenate(images, axis=0)
+
+#              time2 = timeit.default_timer()
+#              print(time2 - time1)
               (boxes, scores, classes, num) = sess.run(
                   [detection_boxes, detection_scores, detection_classes, num_detections],
                   feed_dict={image_tensor: image_np_expanded})
               
-              
-              im_width = image.width
-              im_height = image.height
-              ymin = boxes[0,0,0]
-              xmin = boxes[0,0,1]
-              ymax = boxes[0,0,2]
-              xmax = boxes[0,0,3]
-              (xminn, xmaxx, yminn, ymaxx) = (np.floor(xmin * im_width), np.ceil(xmax * im_width), np.floor(ymin * im_height), np.ceil(ymax * im_height))
-              image_np2 = load_image_into_numpy_array(image)
-              cropped = tf.image.crop_to_bounding_box(image_np2, int(yminn), int(xminn), 
-                                           int(ymaxx - yminn), int(xmaxx - xminn))
-              fname = TARGET_FOLDER + str(i) + '/' + image_item
-              
-              im = Image.fromarray(cropped.eval())
-              im.save(fname)
-    
+#              time3 = timeit.default_timer()
+#              print(time3 - time2)
+              for k in range(0, BATCH_SIZE):
+                  ymin = boxes[k,0,0]
+                  xmin = boxes[k,0,1]
+                  ymax = boxes[k,0,2]
+                  xmax = boxes[k,0,3]
+                  (xminn, xmaxx, yminn, ymaxx) = (np.floor(xmin * im_width), np.ceil(xmax * im_width), np.floor(ymin * im_height), np.ceil(ymax * im_height))
+                  
+                  fname = TARGET_FOLDER + str(i) + '/' + TEST_IMAGE[j+k]          
+#                  im = Image.fromarray(images[k][0, int(yminn):int(ymaxx) , int(xminn):int(xmaxx), :])
+#                  im.save(fname)
+                  cv2.imwrite(fname,images[k][0, int(yminn):int(ymaxx) , int(xminn):int(xmaxx), :])    
+#              time4 = timeit.default_timer()
+#              print(time4 - time3)
