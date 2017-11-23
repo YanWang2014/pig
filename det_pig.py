@@ -8,6 +8,8 @@ https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc
 https://handong1587.github.io/    各种方向的paper列了一堆
 
 
+This file is modified from the official start code of tensorflow object detection api:
+https://github.com/tensorflow/models/blob/master/research/object_detection/object_detection_tutorial.ipynb
 运行说明：
     需要先按照官网安装object detection 模块
     将此程序放在object_detection/some_name/ 文件夹下
