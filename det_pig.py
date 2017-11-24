@@ -105,7 +105,7 @@ def load_image_into_numpy_array(image):
 def select_class(classes, class_keep):
     for i in range(0, len(classes)):
         if classes[i] in class_keep:
-            return 0
+            return i
     print(classes)
     return 0
         
