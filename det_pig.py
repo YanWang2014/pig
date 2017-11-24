@@ -16,7 +16,12 @@ https://github.com/tensorflow/models/blob/master/research/object_detection/objec
     注意修改数据读取路径PATH_TO_TEST_IMAGES_DIR和数据保存路径TARGET_FOLDER，然后运行(test_mode = True为调试开发模式，False为pig数据集上的运行模式)
     默认PATH_TO_TEST_IMAGES_DIR中的pig数据集是按照类别分在不同文件夹下，参见video2image.py
 程序说明：
-    可考虑适当扩展det出的box，以更好地包裹目标，crop时限定不要超出图像边界即可
+    可考虑适当扩展det出的box，以更好地包裹目标，crop时限定不要超出图像边界即可[expand_ratio]
+    如检测出pig, animal可能都是对的，可以依据运行结果调整接受规则，提高鲁棒性[class_keep]
+    
+    注意oid中有pig类别，coco中没有，用coco + 类别筛选仍然可能不保险
+    video tracking方法参考: ILSVRC2016目标检测任务回顾——视频目标检测（VID）
+        https://www.leiphone.com/news/201701/r6GB9fptnK3nDAdz.html
 '''
 
 import numpy as np
@@ -39,12 +44,13 @@ if tf.__version__ != '1.4.0':
   raise ImportError('Please upgrade your tensorflow installation to v1.4.0!')
   
 test_mode = False
-BATCH_SIZE = 4
+BATCH_SIZE = 2
+class_keep = []#[300, 150, 13, 274, 372, 31, 45, 30] # pig & animal etc. 为[]时表示不筛选，直接接受score最大的box
+expand_ratio = 1.05 # 单边膨胀比
 
 sys.path.append("..")
 sys.path.append("../..")
 from utils import label_map_util
-from utils import visualization_utils as vis_util
 from utils import visualization_utils as vis_util
 
 
@@ -96,6 +102,14 @@ def load_image_into_numpy_array(image):
   return np.array(image.getdata()).reshape(
       (im_height, im_width, 3)).astype(np.uint8)
   
+def select_class(classes, class_keep):
+    for i in range(0, len(classes)):
+        if classes[i] in class_keep:
+            return 0
+    print(classes)
+    return 0
+        
+
 
 # For the sake of simplicity we will use only 2 images:
 # image1.jpg
@@ -134,6 +148,8 @@ with detection_graph.as_default():
           (boxes, scores, classes, num) = sess.run(
               [detection_boxes, detection_scores, detection_classes, num_detections],
               feed_dict={image_tensor: image_np_expanded})
+          print(scores)
+          print(classes)
           
           # Visualization of the results of a detection.
           vis_util.visualize_boxes_and_labels_on_image_array(
@@ -187,19 +203,28 @@ with detection_graph.as_default():
               (boxes, scores, classes, num) = sess.run(
                   [detection_boxes, detection_scores, detection_classes, num_detections],
                   feed_dict={image_tensor: image_np_expanded})
-              
+                                
 #              time3 = timeit.default_timer()
 #              print(time3 - time2)
               for k in range(0, BATCH_SIZE):
-                  ymin = boxes[k,0,0]
-                  xmin = boxes[k,0,1]
-                  ymax = boxes[k,0,2]
-                  xmax = boxes[k,0,3]
+                  if len(class_keep) == 0:
+                      box_id = 0
+                  else:
+                      box_id = select_class(classes[k,:], class_keep)
+                  
+                  ymin = boxes[k,box_id,0]
+                  xmin = boxes[k,box_id,1]
+                  ymax = boxes[k,box_id,2]
+                  xmax = boxes[k,box_id,3]
                   (xminn, xmaxx, yminn, ymaxx) = (np.floor(xmin * im_width), np.ceil(xmax * im_width), np.floor(ymin * im_height), np.ceil(ymax * im_height))
+                  w_expend = (xmaxx - xminn) * (expand_ratio-1)
+                  h_expend = (ymaxx - yminn) * (expand_ratio-1)
                   
                   fname = TARGET_FOLDER + str(i) + '/' + TEST_IMAGE[j+k]          
 #                  im = Image.fromarray(images[k][0, int(yminn):int(ymaxx) , int(xminn):int(xmaxx), :])
 #                  im.save(fname)
-                  cv2.imwrite(fname,images[k][0, int(yminn):int(ymaxx) , int(xminn):int(xmaxx), :])    
+                  im_h, im_w = images[k].shape[1], images[k].shape[2]
+                  cv2.imwrite(fname,images[k][0, max(0, int(yminn - h_expend)) : min(im_h, int(ymaxx + h_expend)) , 
+                              max(0, int(xminn - w_expend)) : min(im_w, int(xmaxx + w_expend)), :])    
 #              time4 = timeit.default_timer()
 #              print(time4 - time3)
