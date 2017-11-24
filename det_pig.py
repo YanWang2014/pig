@@ -45,7 +45,7 @@ if tf.__version__ != '1.4.0':
   
 test_mode = False
 BATCH_SIZE = 2
-class_keep = []#[300, 150, 13, 274, 372, 31, 45, 30] # pig & animal etc. 为[]时表示不筛选，直接接受score最大的box
+class_keep = [300, 150]#[300, 150, 13, 274, 372, 31, 45, 30] # pig & animal etc. 为[]时表示不筛选，直接接受score最大的box
 expand_ratio = 1.05 # 单边膨胀比
 
 sys.path.append("..")
