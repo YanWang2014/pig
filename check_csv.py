@@ -8,7 +8,10 @@ Created on Fri Nov 17 15:44:29 2017
 
 import pandas as pd
 
-df = pd.read_csv('result/test_A_1.csv', header = None)
+file = 'result/first/test_A_1.csv'
+#file = 'result/tf/A_1.csv'
+
+df = pd.read_csv(file, header = None)
 
 #(0,1)
 print(df[2].max())
@@ -36,8 +39,8 @@ temp2 = df.groupby(0)[2].sum()
 temp3 = df[0].map(df.groupby(0)[2].sum())
 df3 = df.assign(normalized=df[2].div(df[0].map(df.groupby(0)[2].sum())))
 df[2] = df3['normalized']
-df.to_csv('result/test_A_1_post.csv', header = None, index = None)
-print('=========================================')
+df.to_csv(file.split('.')[0]+'_post.csv', header = None, index = None)
+print('=================after post-processing========================')
 
 
 #(0,1)
