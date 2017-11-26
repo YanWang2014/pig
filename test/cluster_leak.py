@@ -3,6 +3,10 @@
 Created on Sun Nov 26 11:30:56 2017
 
 @author: Beyond
+
+os.stat_result(st_mode=33206, st_ino=1125899907719619, st_dev=922421668, 
+st_nlink=1, st_uid=0, st_gid=0, st_size=122457, 
+st_atime=1511015619, st_mtime=1510947339, st_ctime=1511015619)
 """
 import os
 import time
@@ -15,7 +19,7 @@ a = os.listdir(test_root)
 stats = {}
 for image in a:
     if image.endswith('.JPG'): # there is a json file --
-        stats[int(image.split('.')[0])] = os.stat(test_root + image)[-2]
+        stats[int(image.split('.')[0])] = os.stat(test_root + image).st_mtime
 
 sorted_images = sorted(stats, key=stats.get)
 
