@@ -116,11 +116,8 @@ class Pad2Set(object):
         #i.e. if a tuple of length 4 is provided
         #    this is the padding for the left, top, right and bottom borders respectively.
         w, h = img.size
-        if len(self.padding) > 1:
-            raise ValueError("Currently Pad2Set only support input of a single int")
-        self.padding = ((self.padding-w)//2, (self.padding-h)//2, 
-                        self.padding-(self.padding-w)//2, self.padding-(self.padding-h)//2)
-        return pad(img, self.padding, self.fill)
+        self.padding2 = ((self.padding-w)//2, (self.padding-h)//2, self.padding-w-(self.padding-w)//2, self.padding-h-(self.padding-h)//2)
+        return pad(img, self.padding2, self.fill)
 
 composed_data_transforms = {}
 def data_transforms(phase, input_size = 224, train_scale = 256, test_scale = 256):
@@ -162,8 +159,8 @@ def data_transforms(phase, input_size = 224, train_scale = 256, test_scale = 256
     ]),
     'ten_crop': my_ten_crops(input_size, train_scale, test_scale),#todo: merge my_transform
     'scale_pad': transforms.Compose([ 
-        transforms.my_Resize(test_scale),   # 将长边scale到test_scale，保持长宽比
-        transforms.Pad2Set(input_size), # pad 成正方形，边长为input_size
+        my_Resize(test_scale),   # 将长边scale到test_scale，保持长宽比
+        Pad2Set(input_size), # pad 成正方形，边长为input_size
         transforms.ToTensor(),
         normalize
     ]),
