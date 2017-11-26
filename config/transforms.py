@@ -22,7 +22,7 @@ import torch
 from torchvision import transforms
 import random
 from PIL import Image
-from .transforms_master import ColorJitter, scale, ten_crop, to_tensor
+from .transforms_master import ColorJitter, scale, ten_crop, to_tensor, pad
 import collections
 
 #input_size = 224 
@@ -62,20 +62,13 @@ def my_transform_multiscale_test(varied_scale, flip_flag):
         normalize
     ])
 
-#https://jdhao.github.io/2017/11/06/resize-image-to-square-with-padding/#more
-            transforms.Scale_larger(test_scale),   # 将长边scale到test_scale，保持长宽比
-        transforms.Pad2Square(input_size)
+
 def my_resize(img, size, interpolation=Image.BILINEAR):
     """ Adapted from but opposite to the oficial resize function, i.e.
         If size is an int, the larger edge of the image will be matched to this number maintaing
             the aspect ratio. i.e, if height > width, then image will be rescaled to
             (size, size * width / height)
     """
-    if not _is_pil_image(img):
-        raise TypeError('img should be PIL Image. Got {}'.format(type(img)))
-    if not (isinstance(size, int) or (isinstance(size, collections.Iterable) and len(size) == 2)):
-        raise TypeError('Got inappropriate size arg: {}'.format(size))
-
     if isinstance(size, int):
         w, h = img.size
         if (w >= h and w == size) or (h >= w and h == size):
@@ -112,8 +105,6 @@ class Pad2Set(object):
     """
 
     def __init__(self, padding, fill=0):
-        assert isinstance(padding, (numbers.Number, tuple))
-        assert isinstance(fill, (numbers.Number, str, tuple))
         if isinstance(padding, collections.Sequence) and len(padding) not in [2]:
             raise ValueError("Padding must be an int or a 2 element tuple, not a " +
                              "{} element tuple".format(len(padding)))
