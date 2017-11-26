@@ -5,9 +5,10 @@ Created on Sun Nov 26 11:30:56 2017
 @author: Beyond
 """
 import os
+import time
 
-file = 'result/tf/A_1.csv'
-test_root = 'data/test_A/'
+file = '../result/tf/A_1.csv'
+test_root = '../data/test_A/'
 
 a = os.listdir(test_root)
 
@@ -29,6 +30,17 @@ print(sorted_images.index(2122))
 print(sorted_images.index(1901))
 print(sorted_images.index(4777))
 
-
+'''
+上述print输出如下：
+1506766436
+1506766423
+1506766476
+time.struct_time(tm_year=2017, tm_mon=9, tm_mday=30, tm_hour=5, tm_min=13, tm_sec=56, tm_wday=5, tm_yday=273, tm_isdst=0)
+time.struct_time(tm_year=2017, tm_mon=9, tm_mday=30, tm_hour=5, tm_min=13, tm_sec=43, tm_wday=5, tm_yday=273, tm_isdst=0)
+time.struct_time(tm_year=2017, tm_mon=9, tm_mday=30, tm_hour=5, tm_min=14, tm_sec=36, tm_wday=5, tm_yday=273, tm_isdst=0)
+877
+235
+2380
+'''
 #####################average the softmax########################
 
