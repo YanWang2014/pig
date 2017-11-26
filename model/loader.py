@@ -63,6 +63,9 @@ def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=F
 
     if pretrained == 'imagenet':
         model = torchvision.models.__dict__[arch](pretrained=True)
+        if stage == 1: #第一阶段只训练新加的层
+            for param in model.parameters():
+                param.requires_grad = False
     elif pretrained == 'places':
         if arch == 'preact_resnet50':
             if SENet == True:
