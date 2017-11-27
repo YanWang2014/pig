@@ -33,7 +33,7 @@ def file_name2(file_dir):   #特定类型的文件
                     if os.path.splitext(file)[1] in ['.jpg', '.JPG']:   
                         L.append(test_root+'/'+dir_+'/'+file)
                         image.append(file)
-                        label_raw.append({'image_id':file, 'label_id':int(dir_)})
+                        label_raw.append({'image_id':file, 'label_id':int(dir_)-1})
     else:
         for root, dirs, files in os.walk(file_dir):  
             for file in files:  

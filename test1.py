@@ -18,7 +18,7 @@ import csv
 
 arch = 'resnet18'
 pretrained = 'imagenet'
-phases = ['test_A']
+phases = ['val']
 use_gpu = torch.cuda.is_available()
 batch_size = 32
 INPUT_WORKERS = 32
@@ -48,7 +48,9 @@ if phases[0] == 'test_A':
     test_root = 'data/test_A'
 elif phases[0] == 'test_B':
     test_root = 'data/test_B'
-
+elif phases[0] == 'val':
+    test_root = 'data/validation_folder'
+    
 with open(test_root+'/pig_test_annotations.json', 'r') as f: #label文件, 测试的是我自己生成的
     label_raw_test = json.load(f)
     
@@ -72,7 +74,10 @@ class SceneDataset(Dataset):
         return len(self.label_raw)
 
     def __getitem__(self, idx):
-        img_name = os.path.join(self.root_dir, self.label_raw[idx]['image_id'])
+        if phases[0] == 'val':
+            img_name = self.root_dir+ '/' + str(self.label_raw[idx]['label_id']+1) + '/'+ self.label_raw[idx]['image_id']
+        else:
+            img_name = os.path.join(self.root_dir, self.label_raw[idx]['image_id'])
         img_name_raw = self.label_raw[idx]['image_id']
         image = Image.open(img_name)
         label = int(self.label_raw[idx]['label_id'])
@@ -87,9 +92,9 @@ transformed_dataset_test = SceneDataset(json_labels=label_raw_test,
                                         root_dir=test_root,
                                            transform=data_transforms('test',input_size, train_scale, test_scale)
                                            )           
-dataloader = {'test_A':DataLoader(transformed_dataset_test, batch_size=batch_size,shuffle=False, num_workers=INPUT_WORKERS)
+dataloader = {phases[0]:DataLoader(transformed_dataset_test, batch_size=batch_size,shuffle=False, num_workers=INPUT_WORKERS)
              }
-dataset_sizes = {'test_A': len(label_raw_test)}
+dataset_sizes = {phases[0]: len(label_raw_test)}
 
 
 class AverageMeter(object):
@@ -154,8 +159,6 @@ def test_model (model, criterion):
         
         model.train(False)  # Set model to evaluate mode
 
-        running_loss = 0.0
-        running_corrects = 0
         top1 = AverageMeter()
         top3 = AverageMeter()
         loss1 = AverageMeter()
@@ -190,10 +193,7 @@ def test_model (model, criterion):
             _, preds = torch.max(outputs.data, 1)
             loss = criterion(outputs, labels)
 
-            # statistics
-            running_loss += loss.data[0]
-            running_corrects += torch.sum(preds == labels.data)
-
+#            # statistics
             res, pred_list = accuracy(outputs.data, labels.data, topk=(1, 3))
             prec1 = res[0]
             prec3 = res[1]
@@ -203,11 +203,7 @@ def test_model (model, criterion):
             
             results += batch_to_list_of_dicts(pred_list, img_name_raw)
 
-        epoch_loss = running_loss / dataset_sizes[phase]
-        epoch_acc = running_corrects / dataset_sizes[phase]
 
-#        print('{} Loss: {:.6f} Acc: {:.6f}'.format(
-#            phase, epoch_loss, epoch_acc))
         print(' * Prec@1 {top1.avg:.6f} Prec@3 {top3.avg:.6f} Loss@1 {loss1.avg:.6f}'.format(top1=top1, top3=top3, loss1=loss1))
         
         with open(('result/%s_submit1_%s.json'%(checkpoint_filename, phase)), 'w') as f:
@@ -215,8 +211,9 @@ def test_model (model, criterion):
         
         with open(('result/%s_softmax1_%s.txt'%(checkpoint_filename, phase)), 'wb') as handle:
             pickle.dump(aug_softmax, handle)
-            
-        write_to_csv(aug_softmax)
+        
+        if phases[0] != 'val':
+            write_to_csv(aug_softmax)
     return 0
 
 
