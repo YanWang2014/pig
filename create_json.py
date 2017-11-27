@@ -10,24 +10,37 @@ import json
 import os
 
 
-phases = ['test_A']
+phases = ['val']
 
 if phases[0] == 'test_A':
     test_root = 'data/test_A'
 elif phases[0] == 'test_B':
     test_root = 'data/test_B'
+elif phases[0] == 'val':
+    test_root = 'data/validation_folder'
 
 label_raw = []
 
 def file_name2(file_dir):   #特定类型的文件
     L=[]   
     image = []
-    for root, dirs, files in os.walk(file_dir):  
-        for file in files:  
-            if os.path.splitext(file)[1] == '.JPG':   
-                L.append(os.path.join(root, file))
-                image.append(file)
-                label_raw.append({'image_id':file, 'label_id':1})
+    if phases[0] == 'val':
+        for dir_ in os.listdir(file_dir):
+            if dir_.endswith('.json'):
+                pass
+            else:
+                for file in os.listdir(test_root+'/'+dir_):
+                    if os.path.splitext(file)[1] in ['.jpg', '.JPG']:   
+                        L.append(test_root+'/'+dir_+'/'+file)
+                        image.append(file)
+                        label_raw.append({'image_id':file, 'label_id':int(dir_)})
+    else:
+        for root, dirs, files in os.walk(file_dir):  
+            for file in files:  
+                if os.path.splitext(file)[1] in ['.jpg', '.JPG']:   
+                    L.append(os.path.join(root, file))
+                    image.append(file)
+                    label_raw.append({'image_id':file, 'label_id':1})
     return L, image
 
 path, image_id = file_name2(test_root) #图片目录
