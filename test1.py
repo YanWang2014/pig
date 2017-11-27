@@ -20,13 +20,13 @@ arch = 'resnet18'
 pretrained = 'imagenet'
 phases = ['test_A']
 use_gpu = torch.cuda.is_available()
-batch_size = 128
+batch_size = 32
 INPUT_WORKERS = 32
 checkpoint_filename = arch + '_' + pretrained
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' #tar
-input_size = 256 #[224, 256, 384, 480, 640] 
-train_scale = 256
-test_scale = 256
+input_size = 224 #[224, 256, 384, 480, 640] 
+train_scale = 224
+test_scale = 224
 AdaptiveAvgPool = True
 
 
@@ -158,6 +158,7 @@ def test_model (model, criterion):
         running_corrects = 0
         top1 = AverageMeter()
         top3 = AverageMeter()
+        loss1 = AverageMeter()
         results = []
         aug_softmax = {}
 
@@ -198,15 +199,16 @@ def test_model (model, criterion):
             prec3 = res[1]
             top1.update(prec1[0], inputs.data.size(0))
             top3.update(prec3[0], inputs.data.size(0))
+            loss1.update(loss.data[0], inputs.size(0))
             
             results += batch_to_list_of_dicts(pred_list, img_name_raw)
 
         epoch_loss = running_loss / dataset_sizes[phase]
         epoch_acc = running_corrects / dataset_sizes[phase]
 
-        print('{} Loss: {:.6f} Acc: {:.6f}'.format(
-            phase, epoch_loss, epoch_acc))
-        print(' * Prec@1 {top1.avg:.6f} Prec@3 {top3.avg:.6f}'.format(top1=top1, top3=top3))
+#        print('{} Loss: {:.6f} Acc: {:.6f}'.format(
+#            phase, epoch_loss, epoch_acc))
+        print(' * Prec@1 {top1.avg:.6f} Prec@3 {top3.avg:.6f} Loss@1 {loss1.avg:.6f}'.format(top1=top1, top3=top3, loss1=loss1))
         
         with open(('result/%s_submit1_%s.json'%(checkpoint_filename, phase)), 'w') as f:
             json.dump(results, f)
