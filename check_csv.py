@@ -9,8 +9,8 @@ Created on Fri Nov 17 15:44:29 2017
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = 'result/first/test_A_2.csv'
-#file = 'result/tf/A_1.csv'
+#file = 'result/first/test_A_2.csv'
+file = 'result/tf2/A_1.csv'
 
 df = pd.read_csv(file, header = None)
 

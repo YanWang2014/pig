@@ -8,7 +8,10 @@ Created on Sun Nov 26 09:49:34 2017
 import pandas as pd
 import csv
 
-file = 'result/tf/A_1.csv'
+file = 'result/tf2/A_1.csv'
+file1 = 'result/tf2/test_image_name.csv'
+file2 = 'result/tf2/test_image_result.csv'
+
 
 def write_to_csv(aug_softmax):
     with open(file, 'w', encoding='utf-8') as csvfile:
@@ -18,8 +21,6 @@ def write_to_csv(aug_softmax):
             for c in range(0,30):
                 spamwriter.writerow([item, c+1, aug_softmax[item][c]/the_sum])
 
-file1 = 'result/tf/test_image_name.csv'
-file2 = 'result/tf/test_image_result.csv'
 
 df1 = pd.read_csv(file1, header = None)
 df2 = pd.read_csv(file2, header = None, sep=' ')
