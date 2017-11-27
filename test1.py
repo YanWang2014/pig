@@ -13,24 +13,19 @@ from model import load_model
 from config import data_transforms
 import pickle
 import csv
+from params import *
 
 
-
-arch = 'resnet18'
-pretrained = 'imagenet'
 phases = ['val']
-use_gpu = torch.cuda.is_available()
 batch_size = 32
 INPUT_WORKERS = 32
+
+use_gpu = torch.cuda.is_available()
 checkpoint_filename = arch + '_' + pretrained
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' #tar
-input_size = 224 #[224, 256, 384, 480, 640] 
-train_scale = 224
-test_scale = 224
-AdaptiveAvgPool = True
 
 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu,AdaptiveAvgPool=AdaptiveAvgPool)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 
