@@ -7,11 +7,17 @@ Created on Fri Nov 17 15:44:29 2017
 """
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
-file = 'result/first/test_A_1.csv'
+file = 'result/first/test_A_2.csv'
 #file = 'result/tf/A_1.csv'
 
 df = pd.read_csv(file, header = None)
+
+df_max = df.groupby(df[0]).max()
+df_max.to_csv(file.split('.')[0]+'_max.csv', header = None)
+plt.hist(df_max[2], bins='auto')  # arguments are passed to np.histogram
+plt.show()
 
 #(0,1)
 print(df[2].max())
