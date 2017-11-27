@@ -28,7 +28,7 @@ from params import *
 
 use_gpu = torch.cuda.is_available()
 
-TRAIN_ROOT = 'data/videos_folder/'
+TRAIN_ROOT = 'data/validation_folder/'#'data/videos_folder/'
 VALIDATION_ROOT = 'data/validation_folder/'
 
 
@@ -209,40 +209,47 @@ def run():
             # remember best 
             is_best = loss1 <= best_loss1
             best_loss1 = min(loss1, best_loss1)
-            if use_epoch_decay:
-                if is_best:
-                    save_checkpoint({
+            save_checkpoint({
                         'epoch': epoch + 1,
                         'arch': arch,
                         'state_dict': model.state_dict(),
                         'best_prec3': best_prec3,
                         'loss1': loss1
                         }, is_best)
-                if_adjust = adjust_learning_rate(optimizer, epoch, if_fc, use_epoch_decay)
-                if if_adjust:
-                        my_check = torch.load(best_check)
-                        model.load_state_dict(my_check['state_dict'])
-                        best_prec3 = my_check['best_prec3']
-                        best_loss1 = my_check['loss1']
-            else:
-                if is_best:
-                    save_checkpoint({
-                        'epoch': epoch + 1,
-                        'arch': arch,
-                        'state_dict': model.state_dict(),
-                        'best_prec3': best_prec3,
-                        'loss1': loss1
-                        }, is_best)
-                    best_prec3 = prec3
-                else:
-                    if lr<=lr_min: #lr特别小的时候别来回回滚checkpoint了
-                        best_prec3 = prec3
-                    else:
-                        my_check = torch.load(best_check)
-                        model.load_state_dict(my_check['state_dict'])
-                        best_loss1 = my_check['loss1']
-                        best_prec3 = my_check['best_prec3']
-                        adjust_learning_rate(optimizer, epoch, if_fc, use_epoch_decay) 
+#            if use_epoch_decay:
+#                if is_best:
+#                    save_checkpoint({
+#                        'epoch': epoch + 1,
+#                        'arch': arch,
+#                        'state_dict': model.state_dict(),
+#                        'best_prec3': best_prec3,
+#                        'loss1': loss1
+#                        }, is_best)
+#                if_adjust = adjust_learning_rate(optimizer, epoch, if_fc, use_epoch_decay)
+#                if if_adjust:
+#                        my_check = torch.load(best_check)
+#                        model.load_state_dict(my_check['state_dict'])
+#                        best_prec3 = my_check['best_prec3']
+#                        best_loss1 = my_check['loss1']
+#            else:
+#                if is_best:
+#                    save_checkpoint({
+#                        'epoch': epoch + 1,
+#                        'arch': arch,
+#                        'state_dict': model.state_dict(),
+#                        'best_prec3': best_prec3,
+#                        'loss1': loss1
+#                        }, is_best)
+#                    best_prec3 = prec3
+#                else:
+#                    if lr<=lr_min: #lr特别小的时候别来回回滚checkpoint了
+#                        best_prec3 = prec3
+#                    else:
+#                        my_check = torch.load(best_check)
+#                        model.load_state_dict(my_check['state_dict'])
+#                        best_loss1 = my_check['loss1']
+#                        best_prec3 = my_check['best_prec3']
+#                        adjust_learning_rate(optimizer, epoch, if_fc, use_epoch_decay) 
 
 
 def _each_epoch(mode, loader, model, criterion, optimizer=None, epoch=None):

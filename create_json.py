@@ -25,6 +25,7 @@ def file_name2(file_dir):   #特定类型的文件
     L=[]   
     image = []
     if phases[0] == 'val':
+        sorted_dir = sorted(os.listdir(test_root))
         for dir_ in os.listdir(file_dir):
             if dir_.endswith('.json'):
                 pass
@@ -33,7 +34,7 @@ def file_name2(file_dir):   #特定类型的文件
                     if os.path.splitext(file)[1] in ['.jpg', '.JPG']:   
                         L.append(test_root+'/'+dir_+'/'+file)
                         image.append(file)
-                        label_raw.append({'image_id':file, 'label_id':int(dir_)-1})
+                        label_raw.append({'image_id':file, 'label_id':sorted_dir.index(dir_)})
     else:
         for root, dirs, files in os.walk(file_dir):  
             for file in files:  
