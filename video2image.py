@@ -10,12 +10,12 @@ from subprocess import call
 import os
 import shutil
 
-'''
-video to videos_folder_full
-'''
-for ids in range(1,31):
-    os.makedirs('data/videos_folder_full/'+str(ids))
-    os.system('ffmpeg -i data/videos/{}.mp4 -vf fps=50  data/videos_folder_full/{}/image{}-%4d.jpg'.format(ids,ids,ids))
+#'''
+#video to videos_folder_full
+#'''
+#for ids in range(1,31):
+#    os.makedirs('data/videos_folder_full/'+str(ids))
+#    os.system('ffmpeg -i data/videos/{}.mp4 -vf fps=50  data/videos_folder_full/{}/image{}-%4d.jpg'.format(ids,ids,ids))
 
 
 
@@ -59,4 +59,13 @@ for ids in range(1,31):
 #                shutil.copy(im_path(pig_class, im_id, videos_folder), im_path(pig_class, im_id,TRAIN_ROOT))
         
 
+'''
+30 dir to single dir
+'''
 
+for dir_ in os.listdir('data/validation_folder'):
+    if dir_.endswith('.json'):
+        pass
+    else:
+        for file in os.listdir('data/validation_folder/'+dir_):
+            shutil.copy('data/validation_folder'+'/'+dir_+'/'+file, 'data/validation_folder_full')
