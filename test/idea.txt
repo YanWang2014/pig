@@ -13,3 +13,8 @@
     
     所以关键可能是【如何解决只在每个视频中与测试图片匹配最好的几帧上计算loss，并进行有效的BP。
     另外不知道数据量是否合适】
+    
+    
+    Possible solution:
+        http://www.sohu.com/a/206341878_473283
+        https://search.bilibili.com/all?keyword=AlignedReID%3A+Surpassing+Human-Level+Performance+in+Person+Re-Identification&from_source=banner_search
