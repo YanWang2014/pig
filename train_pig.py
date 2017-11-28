@@ -26,11 +26,6 @@ from config import data_transforms
 from hyperboard import Agent
 from params import *
 
-use_gpu = torch.cuda.is_available()
-
-TRAIN_ROOT = 'data/validation_folder/'#'data/videos_folder/'
-VALIDATION_ROOT = 'data/validation_folder/'
-
 
 def effect(alist):
     temp = 0
@@ -209,6 +204,14 @@ def run():
             # remember best 
             is_best = loss1 <= best_loss1
             best_loss1 = min(loss1, best_loss1)
+            if epoch % save_freq == 0:
+                save_checkpoint_epoch({
+                        'epoch': epoch + 1,
+                        'arch': arch,
+                        'state_dict': model.state_dict(),
+                        'best_prec3': best_prec3,
+                        'loss1': loss1
+                        },  epoch+1)
             save_checkpoint({
                         'epoch': epoch + 1,
                         'arch': arch,
@@ -413,6 +416,8 @@ def save_checkpoint(state, is_best):
     if is_best:
         shutil.copyfile(latest_check, best_check)
 
-
+def save_checkpoint_epoch(state, epoch):
+    torch.save(state, 'checkpoint/' + checkpoint_filename + '_' + str(epoch)+'.pth.tar')
+    
 if __name__ == '__main__':
     run()

@@ -5,11 +5,17 @@ Created on Mon Nov 27 14:19:10 2017
 
 @author: wayne
 """
+import torch
+
+TRAIN_ROOT = 'data/validation_folder/'#'data/videos_folder/'
+VALIDATION_ROOT = 'data/validation_folder/'
+
 
 arch = 'resnet18' # preact_resnet50, resnet152
 pretrained = 'imagenet' #imagenet
 evaluate = False
 checkpoint_filename = arch + '_' + pretrained
+save_freq = 2
 try_resume = False
 print_freq = 10
 if_debug = False
@@ -34,7 +40,7 @@ lr_decay = 0.5
 # training parameters:
 BATCH_SIZE = 32
 INPUT_WORKERS = 8
-epochs = 29
+epochs = 3
 use_epoch_decay = True # 可以加每次调lr时load回来最好的checkpoint
 lr = 0.0001  #0.01  0.001
 lr_min = 1e-6
@@ -53,3 +59,5 @@ confusion_weight = 0.5  #for pairwise loss is 0.1N to 0.2N (where N is the numbe
 betas=(0.9, 0.999)
 eps=1e-08 # 0.1的话一开始都是prec3 4.几
 momentum = 0.9
+
+use_gpu = torch.cuda.is_available()
