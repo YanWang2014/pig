@@ -45,7 +45,7 @@ use_epoch_decay = True # 可以加每次调lr时load回来最好的checkpoint
 lr = 0.0001  #0.01  0.001
 lr_min = 1e-6
 
-if_fc = False #是否先训练最后新加的层，目前的实现不对。
+if_fc = False #是否先训练最后新加的层，目前的实现不一定对，好像是对的，忘了。
 lr1 = lr_min #if_fc = True, 里面的层先不动
 lr2 = 0.2 #if_fc = True, 先学好最后一层
 lr2_min = 0.019#0.0019 #lr2每次除以10降到lr2_min，然后lr2 = lr, lr1 = lr2/slow
