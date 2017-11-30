@@ -1,3 +1,4 @@
+
     首先要考虑用哪种思路来解这个问题。
     乍一看与行人再识别和细粒度分类、检索啥的很像，尤其是很像检索，但是这又是一个分类的问题。
     基本想法是，如果让人类去干这件事，人类会怎么做。肯定是拿着一个测试图片，去和每个视频中的
@@ -13,8 +14,9 @@
     
     所以关键可能是【如何解决只在每个视频中与测试图片匹配最好的几帧上计算loss，并进行有效的BP。
     另外不知道数据量是否合适】
+
+
+    AlignedReID: Surpassing Human-Level Performance in Person Re-Identification
+    原文好像是h方向的end-to-end对齐，认猪的话可以推广到h和w两个方向的end-to-end对齐？
     
     
-    Possible solution:
-        http://www.sohu.com/a/206341878_473283
-        https://search.bilibili.com/all?keyword=AlignedReID%3A+Surpassing+Human-Level+Performance+in+Person+Re-Identification&from_source=banner_search
