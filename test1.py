@@ -21,9 +21,9 @@ from params import *
 import torchvision.datasets as td
 
 
-phases = ['val']
+phases = ['test_A']
 batch_size = BATCH_SIZE
-INPUT_WORKERS = 8
+
 
 if phases[0] == 'test_A':
     test_root = 'data/test_A'
@@ -38,7 +38,7 @@ checkpoint_filename = arch + '_' + pretrained
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' #tar
 
 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 
@@ -149,19 +149,6 @@ def accuracy(output, target, topk=(1,)):
     pred_list = pred.tolist()  #[[14, 13], [72, 15], [74, 11]]
     return res, pred_list
 
-def batch_to_list_of_dicts(indices, image_ids):  #indices2 是预测的labels
-    '''
-    pred_list = pred.tolist()  #[[14, 13], [72, 15], [74, 11]]
-    print(img_name_raw) #('ed531a55d4887dc287119c3f6ebf7eb162bed6cf.jpg', '520036616eb2594b6e9d41b0415deea607e8de12.jpg')
-    '''
-    result = [] #[{"image_id":"a0563eadd9ef79fcc137e1c60be29f2f3c9a65ea.jpg","label_id": [5,18,32]}]
-    dict_ = {}
-    for item in range(len(image_ids)):
-        dict_ ['image_id'] = image_ids[item]
-        dict_['label_id'] = [indices[0][item], indices[1][item], indices[2][item]]
-        result.append(dict_)
-        dict_ = {}
-    return result
 
 my_aug_softmax2 = {}
 def test_model (model, criterion):
@@ -176,7 +163,6 @@ def test_model (model, criterion):
         top1 = AverageMeter()
         top3 = AverageMeter()
         loss1 = AverageMeter()
-        results = []
         aug_softmax = {}
 
         # Iterate over data.
@@ -188,8 +174,6 @@ def test_model (model, criterion):
                 print('step %d vs %d in %.0f s' % (mystep, total_steps, duration))
 
             inputs, labels, img_name_raw= data
-            #inputs, labels = data
-            #img_name_raw = '0'
 
             # wrap them in Variable
             if use_gpu:
@@ -208,12 +192,6 @@ def test_model (model, criterion):
             _, preds = torch.max(outputs.data, 1)
             loss = criterion(outputs, labels)
 
-#            print(outputs.size())
-#            print(temp.shape)
-#            print(outputs[0,:])
-#            print(img_name_raw[0]) #('ed531a55d4887dc287119c3f6ebf7eb162bed6cf.jpg', '520036616eb2594b6e9d41b0415deea607e8de12.jpg')
-#            print(labels[0])
-#            print(preds[0])
             
 #            # statistics
             res, pred_list = accuracy(outputs.data, labels.data, topk=(1, 3))
@@ -223,13 +201,9 @@ def test_model (model, criterion):
             top3.update(prec3[0], inputs.size(0))
             loss1.update(loss.data[0], inputs.size(0))
             
-            results += batch_to_list_of_dicts(pred_list, img_name_raw)
-
 
         print(' * Prec@1 {top1.avg:.6f} Prec@3 {top3.avg:.6f} Loss@1 {loss1.avg:.6f}'.format(top1=top1, top3=top3, loss1=loss1))
         
-        with open(('result/%s_submit1_%s.json'%(checkpoint_filename, phase)), 'w') as f:
-            json.dump(results, f)
         
         with open(('result/%s_softmax1_%s.txt'%(checkpoint_filename, phase)), 'wb') as handle:
             pickle.dump(aug_softmax, handle)

@@ -50,7 +50,7 @@ aaa = ['1','10', '11','12','13','14', '15', '16', '17', '18','19', '2', '20', '2
 
 
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 

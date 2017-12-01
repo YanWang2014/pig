@@ -26,7 +26,6 @@ from config import data_transforms
 from hyperboard import Agent
 from params import *
 
-
 def effect(alist):
     temp = 0
     for item in alist:
@@ -81,7 +80,7 @@ best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar'
 
 
 def run():
-    model = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers)
+    model = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
                                 
     if use_gpu:
         if arch.lower().startswith('alexnet') or arch.lower().startswith('vgg'):
