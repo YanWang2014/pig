@@ -152,6 +152,7 @@ def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=F
             model.fc = nn.Linear(int(model.fc.in_features/input_C*bilinear['dim']), num_classes) #实际上就是batch_size * dim，因为resnet本来就是pool成1*1了，所以in_features = batch_size * C
         if threshold_before_avg:
             model.avgpool = Mask_relu()
+            model.fc = nn.Linear(model.fc.in_features * 2, num_classes)
     elif arch.startswith('densenet'):
         model.classifier = nn.Linear(model.classifier.in_features, num_classes)
     elif arch.startswith('inception'):

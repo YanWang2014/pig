@@ -24,6 +24,7 @@ class Mask_relu(nn.Module):
         
         print('using mask relu')
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
 #        self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
@@ -33,7 +34,7 @@ class Mask_relu(nn.Module):
         x = x * self.mask
 #        x = x[self.mask.expand(x.size())]
 #        x = torch.masked_select(x, self.mask)
-        x = self.avg_pool(x)
+        x = torch.cat((self.avg_pool(x), self.max_pool(x)), 1)
 
         return x
 
