@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 adapted from https://github.com/CSAILVision/places365/blob/master/run_placesCNN_unified.py
+
+https://discuss.pytorch.org/t/extract-feature-maps-from-intermediate-layers-without-modifying-forward/1390
 """
 
 import os
@@ -23,7 +25,7 @@ import cv2
 import numpy as np
 from scipy.misc import imresize as imresize
 
-plot_num = 20
+plot_num = 10
 
 phases = ['test_A']
 batch_size = BATCH_SIZE
@@ -35,6 +37,8 @@ elif phases[0] == 'test_B':
     test_root = 'data/test_B'
 elif phases[0] == 'val':
     test_root = 'data/validation_folder_full'
+elif phases[0] == 'train':
+    test_root = 'data/train_folder/2'
     
 
 use_gpu = torch.cuda.is_available()
@@ -42,7 +46,7 @@ checkpoint_filename = arch + '_' + pretrained
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' #tar
 
 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 
@@ -51,11 +55,11 @@ best_checkpoint = torch.load(best_check)
 features_blobs = []
 def hook_feature(module, input, output):
     features_blobs.append(np.squeeze(output.data.cpu().numpy()))
-features_names = ['layer4','avgpool'] # this is the last conv layer of the resnet
+features_names = ['layer5'] # layer4 is for original resnet,layer5 is for masked resnet
 for name in features_names:
     model_conv._modules.get(name).register_forward_hook(hook_feature)
 
-tf = data_transforms('validation')
+tf = data_transforms('validation',input_size, train_scale, test_scale)
 
 def returnCAM(feature_conv, weight_softmax, class_idx):
     # generate the class activation maps upsample to 256x256
@@ -73,6 +77,9 @@ def returnCAM(feature_conv, weight_softmax, class_idx):
 
 # get the softmax weight
 params = list(model_conv.parameters())
+print(params[-1].size())
+print(params[-2].size())
+print(params[-3].size())
 weight_softmax = params[-2].data.numpy()
 weight_softmax[weight_softmax<0] = 0
     
