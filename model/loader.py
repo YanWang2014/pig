@@ -36,7 +36,7 @@ import torchvision.models
 from .spp_layer import SPPLayer
 from .compact_bilinear_pooling import CompactBilinearPooling
 from .se_resnet152_places365 import give_se_resnet152_places365
-from .mask_relu import Mask_relu
+from .Mask_resnet import Mask_resnet
 
 
 support_models = {
@@ -51,10 +51,10 @@ model_file_root = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'pl
 
 def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=False, SPP=False, num_levels=3, pool_type='avg_pool', bilinear={'use':False,'dim':16384}, stage=2, SENet=False, se_stage=2, se_layers=None, threshold_before_avg = False):
     num_mul = sum([(2**i)**2 for i in range(num_levels)])
-    if SPP and (AdaptiveAvgPool or threshold_before_avg):
-        raise ValueError("Set AdaptiveAvgPool = False and threshold_before_avg = False when using SPP = True")
-    if bilinear['use'] and (SPP or AdaptiveAvgPool or threshold_before_avg):
-        raise ValueError("Set AdaptiveAvgPool, SPP and threshold_before_avg = False when using bilinear")
+    if SPP and AdaptiveAvgPool:
+        raise ValueError("Set AdaptiveAvgPool = False when using SPP = True")
+    if bilinear['use'] and (SPP or AdaptiveAvgPool):
+        raise ValueError("Set AdaptiveAvgPool, SPP = False when using bilinear")
     if AdaptiveAvgPool or SPP or SENet or threshold_before_avg:
         if not 'resnet' in arch:
             raise NotImplementedError("Currently AdaptiveAvgPool, SPP, SE and threshold_before_avg only support resnets")
@@ -134,7 +134,10 @@ def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=F
                 model = torch.load(model_file, map_location=lambda storage, loc: storage, pickle_module=pickle) 
 
     if arch.startswith('resnet'):
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        if threshold_before_avg:
+            model = Mask_resnet(arch, num_classes)
+        else:
+            model.fc = nn.Linear(model.fc.in_features, num_classes)
         if AdaptiveAvgPool:
             model.avgpool = nn.AdaptiveAvgPool2d(1)
         if SPP:
@@ -150,9 +153,7 @@ def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=F
                         param.requires_grad = False
             model.avgpool = CompactBilinearPooling(input_C, input_C, bilinear['dim']) #(input_C, input_C, output_C)
             model.fc = nn.Linear(int(model.fc.in_features/input_C*bilinear['dim']), num_classes) #实际上就是batch_size * dim，因为resnet本来就是pool成1*1了，所以in_features = batch_size * C
-        if threshold_before_avg:
-            model.avgpool = Mask_relu()
-            model.fc = nn.Linear(model.fc.in_features * 2, num_classes)
+
     elif arch.startswith('densenet'):
         model.classifier = nn.Linear(model.classifier.in_features, num_classes)
     elif arch.startswith('inception'):
