@@ -10,10 +10,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-#file = 'result/first/test_A_2.csv'
-file = 'result/tf2/A_1.csv'
+#file = 'result/torch/test_A_1.csv'
+#file = 'result/tf6/A_1.csv'
 #file = 'result/val_1.csv'
 #file = 'result/test_A_1.csv'
+#file = 'result/me/test_A_1.csv'
+file = 'result/me2/152test_A_1.csv'
+
+#KK = '30'  
+#name = 'test'#val, test
+#file = ('result/tf6_%s/A_1_%s.csv' %(name,KK))
 
 df = pd.read_csv(file, header = None)
 
@@ -75,3 +81,11 @@ plt.hist(df_max[2], bins='auto')  # arguments are passed to np.histogram
 plt.show()
 df_max[3] = np.log(df_max[2])
 print(-df_max[3].sum()/len(df_max))
+
+# 计算val的loss
+#if 'val' in file:
+#    df
+
+# 统计预测类别的分布， 与txt2csv类似
+freq = df.sort_values(2, ascending=False).drop_duplicates([0])
+plt.hist(freq[1], bins=30)  # arguments are passed to np.histogram
