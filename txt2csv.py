@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #file1 = 'result/tf6/test_image_name.csv'
 #file2 = 'result/tf6/test_image_result.csv'
 
-KK = '100'
+KK = '30'  # 大了不好的原因可能是数据中角度造成的类内差异可能大于类间差异，这个在triplet loss训练中没有保证吗（loss != 0，估计是不能完全保证？）？ 估计k_max = 10-15
 MODE = 'valid'
 file = ('result/tf6_val/A_1_%s.csv' %KK)
 file1 = ('result/tf6_val/%s_image_name.csv'%MODE)
