@@ -14,10 +14,10 @@ import numpy as np
 #file = 'result/tf6/A_1.csv'
 #file = 'result/val_1.csv'
 #file = 'result/test_A_1.csv'
-#file = 'result/me/test_A_1.csv'
-file = 'result/me2/152test_A_1.csv'
+#file = 'result/me3/test_A_1.csv'
+file = 'result/me2/18test_A_1.csv'
 
-#KK = '30'  
+#KK = '7'  
 #name = 'test'#val, test
 #file = ('result/tf6_%s/A_1_%s.csv' %(name,KK))
 
@@ -89,3 +89,4 @@ print(-df_max[3].sum()/len(df_max))
 # 统计预测类别的分布， 与txt2csv类似
 freq = df.sort_values(2, ascending=False).drop_duplicates([0])
 plt.hist(freq[1], bins=30)  # arguments are passed to np.histogram
+print(freq[1].value_counts())
