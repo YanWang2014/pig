@@ -7,11 +7,17 @@ Created on Sun Nov 26 09:49:34 2017
 
 import pandas as pd
 import csv
+import matplotlib.pyplot as plt
 
-file = 'result/tf2/A_1.csv'
-file1 = 'result/tf2/test_image_name.csv'
-file2 = 'result/tf2/test_image_result.csv'
+#file = 'result/tf6/A_1.csv'
+#file1 = 'result/tf6/test_image_name.csv'
+#file2 = 'result/tf6/test_image_result.csv'
 
+KK = '100'
+MODE = 'valid'
+file = ('result/tf6_val/A_1_%s.csv' %KK)
+file1 = ('result/tf6_val/%s_image_name.csv'%MODE)
+file2 = ('result/tf6_val/%s_k_%s_image_result.csv' %(MODE,KK))
 
 def write_to_csv(aug_softmax):
     with open(file, 'w', encoding='utf-8') as csvfile:
@@ -53,3 +59,8 @@ print(df3[1].min())
 #1
 print(df3[2].max())
 print(df3[2].min())
+
+
+# 统计每一类出现的次数，没有考虑属于多个类概率相同的情况
+freq = df2.idxmax(axis=1)
+plt.hist(freq, bins=30)  # arguments are passed to np.histogram
