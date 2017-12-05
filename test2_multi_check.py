@@ -67,8 +67,6 @@ if arch.lower().startswith('alexnet') or arch.lower().startswith('vgg'):
 else:
     model_conv = nn.DataParallel(model_conv).cuda()
     model_conv.load_state_dict(best_checkpoint['state_dict']) 
-if triplet:
-    model_conv = model_conv.embeddingnet
     
 with open(test_root+'/pig_test_annotations.json', 'r') as f: #label文件, 测试的是我自己生成的
     label_raw_test = json.load(f)

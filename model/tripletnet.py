@@ -27,14 +27,16 @@ class Tripletnet(nn.Module):
         super(Tripletnet, self).__init__()
         self.embeddingnet = embeddingnet
 
-    def forward(self, x, y, z):
+    def forward(self, x, y=None, z=None):
         logits_x = self.embeddingnet(x)  #这里是logits，供softmax使用
-#        logits_y = self.embeddingnet(y)
-#        logits_z = self.embeddingnet(z)
-        
-        embedded_x = F.normalize(logits_x)  #这里是l2归一化的logits，供triplet loss使用。甚至可以使用和softmax不同层的特征？
-        embedded_y = F.normalize(self.embeddingnet(y))
-        embedded_z = F.normalize(self.embeddingnet(z))
-#        dist_a = F.pairwise_distance(embedded_x, embedded_y, 2)
-#        dist_b = F.pairwise_distance(embedded_x, embedded_z, 2)
-        return logits_x, embedded_x, embedded_y, embedded_z
+
+        if y==None and z==None:
+            #print("Tripletnet working in test mode")
+            return logits_x
+        else:
+            #print("Tripletnet working in test mode")
+            embedded_x = F.normalize(logits_x)  #这里是l2归一化的logits，供triplet loss使用。甚至可以使用和softmax不同层的特征？
+            embedded_y = F.normalize(self.embeddingnet(y))
+            embedded_z = F.normalize(self.embeddingnet(z))
+    
+            return logits_x, embedded_x, embedded_y, embedded_z
