@@ -37,8 +37,19 @@ use_gpu = torch.cuda.is_available()
 checkpoint_filename = arch + '_' + pretrained
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' #tar
 
+'''
+这是imagefolder的顺序
+'''
+if not triplet:
+    aaa = ['1','10', '11','12','13','14', '15', '16', '17', '18','19', '2', '20', '21', '22','23', 
+     '24', '25', '26', '27', '28', '29', '3', '30', '4', '5', '6', '7', '8','9']
+else:
+    aaa = [str(i+1) for i in range(0,30)]
 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=num_classes,  AdaptiveAvgPool=AdaptiveAvgPool,
+                       SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, 
+                       SENet=SENet,se_stage=se_stage,se_layers=se_layers, 
+                       threshold_before_avg = threshold_before_avg, triplet = triplet)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 
@@ -51,24 +62,22 @@ if arch.lower().startswith('alexnet') or arch.lower().startswith('vgg'):
 else:
     model_conv = nn.DataParallel(model_conv).cuda()
     model_conv.load_state_dict(best_checkpoint['state_dict']) 
-
-
+if triplet:
+    model_conv = model_conv.embeddingnet
     
 with open(test_root+'/pig_test_annotations.json', 'r') as f: #label文件, 测试的是我自己生成的
     label_raw_test = json.load(f)
     
 def write_to_csv(aug_softmax): #aug_softmax[img_name_raw[item]] = temp[item,:]
-    a = ['1','10', '11','12','13','14', '15', '16', '17', '18','19', '2', '20', '21', '22','23', 
-     '24', '25', '26', '27', '28', '29', '3', '30', '4', '5', '6', '7', '8','9']
     with open('result/'+ phases[0] +'_1.csv', 'w', encoding='utf-8') as csvfile:
         spamwriter = csv.writer(csvfile,dialect='excel')
         for item in aug_softmax.keys():
             the_sum = sum(aug_softmax[item])
             for c in range(0,30):
                 if phases[0] != 'val':
-                    spamwriter.writerow([int(item.split('.')[0]), c+1, aug_softmax[item][a.index(str(c+1))]/the_sum])
+                    spamwriter.writerow([int(item.split('.')[0]), c+1, aug_softmax[item][aaa.index(str(c+1))]/the_sum])
                 else:
-                    spamwriter.writerow([item, c+1, aug_softmax[item][a.index(str(c+1))]/the_sum])
+                    spamwriter.writerow([item, c+1, aug_softmax[item][aaa.index(str(c+1))]/the_sum])
 
 
 class SceneDataset(Dataset):

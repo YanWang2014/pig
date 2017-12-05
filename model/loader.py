@@ -37,7 +37,7 @@ from .spp_layer import SPPLayer
 from .compact_bilinear_pooling import CompactBilinearPooling
 from .se_resnet152_places365 import give_se_resnet152_places365
 from .Mask_resnet import Mask_resnet
-
+from .tripletnet import Tripletnet
 
 support_models = {
     'places': ('alexnet', 'densenet161', 'resnet18', 'resnet50', 'preact_resnet50', 'resnet152'),
@@ -49,7 +49,7 @@ support_models = {
 model_file_root = os.path.join(os.path.split(os.path.realpath(__file__))[0], 'places365')
 
 
-def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=False, SPP=False, num_levels=3, pool_type='avg_pool', bilinear={'use':False,'dim':16384}, stage=2, SENet=False, se_stage=2, se_layers=None, threshold_before_avg = False):
+def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=False, SPP=False, num_levels=3, pool_type='avg_pool', bilinear={'use':False,'dim':16384}, stage=2, SENet=False, se_stage=2, se_layers=None, threshold_before_avg = False, triplet = False):
     num_mul = sum([(2**i)**2 for i in range(num_levels)])
     if SPP and AdaptiveAvgPool:
         raise ValueError("Set AdaptiveAvgPool = False when using SPP = True")
@@ -163,4 +163,7 @@ def load_model(arch, pretrained, use_gpu=True, num_classes=30, AdaptiveAvgPool=F
     else:
         raise NotImplementedError('This pretrained model has not been adapted to the current tast yet.')
 
+
+    if triplet:
+        return Tripletnet(model)
     return model

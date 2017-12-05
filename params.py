@@ -7,12 +7,13 @@ Created on Mon Nov 27 14:19:10 2017
 """
 import torch
 
-TRAIN_ROOT = 'data/videos_folder/'
-VALIDATION_ROOT = 'data/validation_folder/'
+TRAIN_ROOT = 'data/train_folder_det_resize1'
+VALIDATION_ROOT = 'data/validation_folder_det_resize1'
 
 
 arch = 'resnet18' # preact_resnet50, resnet152
 pretrained = 'imagenet' #imagenet
+num_classes = 30
 threshold_before_avg = True
 evaluate = False
 checkpoint_filename = arch + '_' + pretrained
@@ -27,7 +28,7 @@ SPP = False
 num_levels = 1 # 1 = fcn
 pool_type = 'avg_pool'
 bilinear = {'use':False,'dim':16384}  #没有放进hyper_board
-stage = 1 #注意，1只训练新加的fc层，改为2后要用try_resume = True
+stage = 2 #注意，1只训练新加的fc层，改为2后要用try_resume = True
 SENet = False
 se_layers = [None,None,None,'7'] # 4,5,6,7 [3, 8, 36, 3]
 print(se_layers)
@@ -39,11 +40,11 @@ train_transform = 'train2'
 lr_decay = 0.5
 
 # training parameters:
-BATCH_SIZE = 32
+BATCH_SIZE = 10
 INPUT_WORKERS = 8
-epochs = 3
-use_epoch_decay = True # 可以加每次调lr时load回来最好的checkpoint
-lr = 0.01  #0.01  0.001
+epochs = 10
+use_epoch_decay = False # 可以加每次调lr时load回来最好的checkpoint
+lr = 0.00001  #0.01  0.001
 lr_min = 1e-6
 
 if_fc = False #是否先训练最后新加的层，目前的实现不对。
@@ -62,3 +63,19 @@ eps=1e-08 # 0.1的话一开始都是prec3 4.几
 momentum = 0.9
 
 use_gpu = torch.cuda.is_available()
+
+
+
+'''
+更改了data loader, loss的计算和显示(注意保存的最佳checkpoint还是softmax loss最低的)，别的地方不用动。
+目测兼容之前所有的cnn和bilinear, spp等附加层。
+'''
+triplet = True
+if triplet: 
+    triplet_weight = 0.5 #triplet loss前面乘的系数
+    triplet_margin = 1
+    triplet_print_freq = 10
+    triplet_debug = True
+    TRAIN_ROOT = 'data/train_folder_det_resize'
+    VALIDATION_ROOT = 'data/validation_folder_det_resize'
+

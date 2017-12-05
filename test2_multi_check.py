@@ -21,11 +21,11 @@ from params import *
 import torchvision.datasets as td
 import numpy as np
 
-phases = ['val']
+phases = ['test_A']
 batch_size = BATCH_SIZE
 
 if phases[0] == 'test_A':
-    test_root = 'data/test_A'
+    test_root = 'data/pig_test_resize'
 elif phases[0] == 'test_B':
     test_root = 'data/test_B'
 elif phases[0] == 'val':
@@ -36,21 +36,26 @@ multi_checks = []
 '''
 在这里指定使用哪几个epoch的checkpoint进行平均
 '''
-for epoch_check in ['1']:   # epoch的列表，如['10', '20']
+for epoch_check in ['5','7','9']:   # epoch的列表，如['10', '20']
     multi_checks.append('checkpoint/' + checkpoint_filename + '_' + str(epoch_check)+'.pth.tar')
+
 
 '''
 这是imagefolder的顺序
 '''
-aaa = ['1','10', '11','12','13','14', '15', '16', '17', '18','19', '2', '20', '21', '22','23', 
+if not triplet:
+    aaa = ['1','10', '11','12','13','14', '15', '16', '17', '18','19', '2', '20', '21', '22','23', 
      '24', '25', '26', '27', '28', '29', '3', '30', '4', '5', '6', '7', '8','9']
-
-
+else:
+    aaa = [str(i+1) for i in range(0,30)]
 
 
 
 best_check = 'checkpoint/' + checkpoint_filename + '_best.pth.tar' 
-model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=30,  AdaptiveAvgPool=AdaptiveAvgPool, SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, SENet=SENet,se_stage=se_stage,se_layers=se_layers, threshold_before_avg = threshold_before_avg)
+model_conv = load_model(arch, pretrained, use_gpu=use_gpu, num_classes=num_classes,  AdaptiveAvgPool=AdaptiveAvgPool,
+                       SPP=SPP, num_levels=num_levels, pool_type=pool_type, bilinear=bilinear, stage=stage, 
+                       SENet=SENet,se_stage=se_stage,se_layers=se_layers, 
+                       threshold_before_avg = threshold_before_avg, triplet = triplet)
 for param in model_conv.parameters():
     param.requires_grad = False #节省显存
 
@@ -62,8 +67,8 @@ if arch.lower().startswith('alexnet') or arch.lower().startswith('vgg'):
 else:
     model_conv = nn.DataParallel(model_conv).cuda()
     model_conv.load_state_dict(best_checkpoint['state_dict']) 
-
-
+if triplet:
+    model_conv = model_conv.embeddingnet
     
 with open(test_root+'/pig_test_annotations.json', 'r') as f: #label文件, 测试的是我自己生成的
     label_raw_test = json.load(f)
