@@ -127,7 +127,7 @@ def run():
         raise ValueError('Have not tested if class aware works for dataset, it works for imagefolder')
         train_set = triplet_image_dataset.TripletImageDataset(json_labels=label_raw_train,
                                         root_dir=TRAIN_ROOT, transform = data_transforms(train_transform,input_size, train_scale, test_scale),
-                                        distance = 10, frames = 561)
+                                        distance = train_distance, frames = train_frames)
         train_loader = torch.utils.data.DataLoader(
                 train_set,
                 batch_size=BATCH_SIZE, shuffle=False,
@@ -137,14 +137,14 @@ def run():
         train_loader = torch.utils.data.DataLoader(
                 triplet_image_dataset.TripletImageDataset(json_labels=label_raw_train,
                                         root_dir=TRAIN_ROOT, transform = data_transforms(train_transform,input_size, train_scale, test_scale),
-                                        distance = 10, frames = 561),
+                                        distance = train_distance, frames = train_frames),
                 batch_size=BATCH_SIZE, shuffle=True,
                 num_workers=INPUT_WORKERS, pin_memory=use_gpu)
         
     val_loader = torch.utils.data.DataLoader(
             triplet_image_dataset.TripletImageDataset(json_labels=label_raw_val,
                                         root_dir=VALIDATION_ROOT, transform = data_transforms('validation',input_size, train_scale, test_scale),
-                                        distance = 5, frames = 29),
+                                        distance = val_distance, frames = val_frames),
             batch_size=BATCH_SIZE, shuffle=False,
             num_workers=INPUT_WORKERS, pin_memory=use_gpu)
 

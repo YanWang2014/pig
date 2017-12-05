@@ -72,10 +72,17 @@ use_gpu = torch.cuda.is_available()
 '''
 triplet = True
 if triplet: 
-    triplet_weight = 0.5 #triplet loss前面乘的系数
+    triplet_weight = 0.5 #triplet loss前面乘的系数。 目前交叉熵系数固定为1
     triplet_margin = 1
-    triplet_print_freq = 10
+    
+    triplet_print_freq = 10 #打印一个epoch内的中间结果
     triplet_debug = True
-    TRAIN_ROOT = 'data/train_folder_det_resize'
+    
+    TRAIN_ROOT = 'data/train_folder_det_resize'   #注意是不区分子目录的
     VALIDATION_ROOT = 'data/validation_folder_det_resize'
+    
+    train_distance = 10 #p在a的前后10张内
+    train_frames = 561 #train set中每个类的图片数量上确界
+    val_distance = 5
+    val_frames = 29
 
