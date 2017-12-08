@@ -31,8 +31,8 @@ class Tripletnet(nn.Module):
     def forward(self, x, y=None, z=None):
         logits_x = self.embeddingnet(x)  #这里是logits，供softmax使用
 
-        if not isinstance(x, Variable):
-            print("Tripletnet working in test mode")
+        if not isinstance(y, Variable):
+#            print("Tripletnet working in test mode")
             return logits_x
         else:
             #print("Tripletnet working in test mode")
